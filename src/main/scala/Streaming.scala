@@ -1,4 +1,3 @@
-import com.mongodb.spark.MongoSpark
 import config._
 import org.apache.spark.streaming.StreamingContext
 import model._
@@ -6,11 +5,15 @@ import consumer._
 import twitter4j.TwitterObjectFactory
 import com.mongodb.spark.sql._
 
-object Streaming extends KafkaConsumerConfiguration with SparkConfiguration with SparkConsumer {
+object Streaming extends KafkaConsumerConfiguration
+  with SparkConfiguration
+  with SparkConsumer
+  with MongodbConfig {
 
   def main(args: Array[String]): Unit = {
 
-    val spark = getSparkSession
+    val mongoConfig = getMongodbConfig
+    val spark = getSparkSession(mongoConfig)
     val streamingContext: StreamingContext = getSparkStreamingContext(spark)
     val kafkaConfig = getKafkaConfig
     val stream = getInputDStream(streamingContext, kafkaConfig)
@@ -25,11 +28,6 @@ object Streaming extends KafkaConsumerConfiguration with SparkConfiguration with
           status.getHashtagEntities.map(hashTag => hashTag.getText).toSeq
         )
       })
-
-    //def counter
-
-    twitterEvents.cache()
-    twitterEvents.map(_.author).print(20)
 
     twitterEvents.foreachRDD({rdd =>
       import spark.implicits._

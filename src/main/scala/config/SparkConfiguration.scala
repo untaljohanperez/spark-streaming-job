@@ -8,11 +8,11 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 trait SparkConfiguration {
 
-  def getSparkSession(/*mongoConfig: MongoConfig*/): SparkSession = {
+  def getSparkSession(mongoConfig: MongoConfig): SparkSession = {
     SparkSession.builder
       .appName("Simple Application").master("local[*]")
       .config("spark.streaming.kafka.allowNonConsecutiveOffsets", "true")
-      .config("spark.mongodb.output.uri", "mongodb://127.0.0.1/twitter-endava.tweets2")
+      .config("spark.mongodb.output.uri", mongoConfig.uri)
       .getOrCreate()
   }
 
