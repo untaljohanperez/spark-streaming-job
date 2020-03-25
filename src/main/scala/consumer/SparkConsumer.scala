@@ -6,7 +6,7 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 
-trait SparkConsumer {
+object SparkConsumer {
   def getInputDStream(streamingContext: StreamingContext, kafkaConfig: KafkaConfig) = {
     KafkaUtils.createDirectStream[String, String](
       streamingContext,
@@ -15,3 +15,6 @@ trait SparkConsumer {
     )
   }
 }
+
+
+

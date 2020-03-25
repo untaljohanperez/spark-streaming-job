@@ -1,0 +1,3 @@
+package config
+
+object Configuration extends KafkaConsumerConfiguration with SparkConfiguration with MongodbConfig

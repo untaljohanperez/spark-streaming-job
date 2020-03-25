@@ -5,18 +5,15 @@ import consumer._
 import twitter4j.TwitterObjectFactory
 import com.mongodb.spark.sql._
 
-object Streaming extends KafkaConsumerConfiguration
-  with SparkConfiguration
-  with SparkConsumer
-  with MongodbConfig {
+object Streaming {
 
   def main(args: Array[String]): Unit = {
 
-    val mongoConfig = getMongodbConfig
-    val spark = getSparkSession(mongoConfig)
-    val streamingContext: StreamingContext = getSparkStreamingContext(spark)
-    val kafkaConfig = getKafkaConfig
-    val stream = getInputDStream(streamingContext, kafkaConfig)
+    val mongoConfig = Configuration.getMongodbConfig
+    val spark = Configuration.getSparkSession(mongoConfig)
+    val streamingContext: StreamingContext = Configuration.getSparkStreamingContext(spark)
+    val kafkaConfig = Configuration.getKafkaConfig
+    val stream = SparkConsumer.getInputDStream(streamingContext, kafkaConfig)
 
     val twitterEvents = stream.map(record => record.value)
       .map(record => {
