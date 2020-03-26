@@ -1,7 +1,5 @@
 import config._
-import org.apache.spark.streaming.StreamingContext
 import model._
-import consumer._
 import twitter4j.TwitterObjectFactory
 import com.mongodb.spark.sql._
 
@@ -9,11 +7,13 @@ object Streaming {
 
   def main(args: Array[String]): Unit = {
 
-    val mongoConfig = Configuration.getMongodbConfig
-    val spark = Configuration.getSparkSession(mongoConfig)
-    val streamingContext: StreamingContext = Configuration.getSparkStreamingContext(spark)
-    val kafkaConfig = Configuration.getKafkaConfig
-    val stream = SparkConsumer.getInputDStream(streamingContext, kafkaConfig)
+    val config = ConfigurationLive.config
+
+    val mongoConfig = config.mongo.getMongodbConfig
+    val spark = config.spark.getSparkSession(mongoConfig)
+    val streamingContext = config.spark.getSparkStreamingContext(spark)
+    val kafkaConfig = config.kafka.getKafkaConfig
+    val stream = config.consumer.getInputDStream(streamingContext, kafkaConfig)
 
     val twitterEvents = stream.map(record => record.value)
       .map(record => {
