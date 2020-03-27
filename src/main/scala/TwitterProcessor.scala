@@ -8,6 +8,7 @@ import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
 import zio._
 import zio.{Task, ZIO, App}
+import zio.blocking._
 
 object TwitterProcessor extends App {
 
@@ -25,13 +26,17 @@ object TwitterProcessor extends App {
     stream <- config.consumer.getInputDStream(streamingContext, kafkaConfig)
     twitterEvents <- transformStream(stream)
     _ <- writeToMongo(twitterEvents, spark)
-  } yield startStream(streamingContext)
+    _ <- startStream(streamingContext)
+  } yield awaitTerminationBlocking(streamingContext)
 
   def startStream(streamingContext: StreamingContext): Task[Unit] =
     Task.effect {
       streamingContext.start()
       streamingContext.awaitTermination()
     }
+
+  def awaitTerminationBlocking(streamingContext: StreamingContext) =
+    effectBlocking(Task(streamingContext.awaitTermination()))
 
   def writeToMongo(twitterEvents: DStream[TwitterEvent], spark: SparkSession): Task[Unit] =
     Task(twitterEvents.foreachRDD({rdd =>
@@ -45,6 +50,7 @@ object TwitterProcessor extends App {
       .map(record => {
         val status = TwitterObjectFactory.createStatus(record)
 
+        println(status.getUser.getScreenName)
         TwitterEvent(status.getUser.getScreenName,
           new java.sql.Date(status.getCreatedAt.getTime),
           System.currentTimeMillis(),
