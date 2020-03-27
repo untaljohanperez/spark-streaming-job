@@ -1,10 +1,11 @@
 package config
 
 import org.apache.kafka.common.serialization.StringDeserializer
+import zio.Task
 
 object KafkaConsumerConfiguration {
   trait Service {
-    def getKafkaConfig(): KafkaConfig
+    def getKafkaConfig(): Task[KafkaConfig]
   }
 }
 
@@ -15,7 +16,7 @@ trait KafkaConsumerConfiguration {
 trait KafkaConsumerConfigurationLive extends KafkaConsumerConfiguration {
 
   def config: KafkaConsumerConfiguration.Service =
-    () => {
+    () => Task {
       val kafkaParams = Map[String, Object](
         "bootstrap.servers" -> "localhost:19092,localhost:19093,localhost:19094",
         "key.deserializer" -> classOf[StringDeserializer],

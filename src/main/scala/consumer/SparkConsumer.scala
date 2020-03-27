@@ -7,10 +7,11 @@ import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
+import zio.Task
 
 object SparkConsumer {
   trait Service {
-    def getInputDStream(streamingContext: StreamingContext, kafkaConfig: KafkaConfig): InputDStream[ConsumerRecord[String, String]]
+    def getInputDStream(streamingContext: StreamingContext, kafkaConfig: KafkaConfig): Task[InputDStream[ConsumerRecord[String, String]]]
   }
 }
 
@@ -20,13 +21,12 @@ trait SparkConsumer {
 
 trait SparkConsumerLive extends SparkConsumer {
   def consumer: SparkConsumer.Service =
-    (streamingContext: StreamingContext, kafkaConfig: KafkaConfig) => {
-      KafkaUtils.createDirectStream[String, String](
+    (streamingContext: StreamingContext, kafkaConfig: KafkaConfig) =>
+      Task(KafkaUtils.createDirectStream[String, String](
         streamingContext,
         PreferConsistent,
         Subscribe[String, String](kafkaConfig.topics, kafkaConfig.kafkaParams)
-      )
-    }
+      ))
 }
 
 object SparkConsumerLive extends SparkConsumerLive
